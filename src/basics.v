@@ -70,10 +70,24 @@ apply: leq_ltn_add=>//.
 by rewrite addnC addn1 ltnS; apply: leq_addr.
 Qed.
 
+(* Variable (a b c d  e: T).
+Eval compute in (T_rev [::]).
+Eval compute in (T_rev [:: a]).
+Eval compute in (T_rev [:: a; b]).
+
+Eval compute in (half (1 * 2)). *)
+
+
 (* Exercise 1.5.1: exact complexity for T_rev *)
-Lemma T_rev_complexity xs : T_rev xs = (size xs).+1 ^2. (* FIXME *)
+Lemma T_rev_complexity xs : T_rev xs = half (((size xs).+1) * ((size xs).+2)).
 Proof.
-Admitted.
+  elim: xs=>[|x xs' IH]=> //.
+  simpl T_rev.
+  rewrite T_app_complexity rev'_size IH.
+  simpl size.
+  set t := size xs'.
+  by rewrite -[_.+3]addn2 mulnDr halfD muln2 odd_double Bool.andb_false_r add0n half_double addnS -{1}addn2 -addnA addn2 mulnC.
+Qed.
 
 (* itrev is called catrev in the lib *)
 
