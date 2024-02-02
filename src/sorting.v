@@ -96,7 +96,21 @@ Admitted.
 
 Lemma T_isort_optimal xs : sorted <=%O xs -> T_isort xs = (2 * size xs).+1.
 Proof.
-Admitted.
+  elim: xs=>[| x xs' IH]//=.
+  move=> p.
+  rewrite (IH (path_sorted p)).
+  congr (_.+1).
+  rewrite -[(size xs').+1]addn1 mulnDr muln1 addn2.
+  rewrite -[(2 * size xs').+2]addn1.
+  congr (_ + _).
+  move=> {IH}.
+  suff: xs' = isort xs'.
+  - move=><-.
+    case: xs' p=>//= y ys /andP ; case.
+    by move=>->.
+  apply: isort_beh=> //=.
+  by apply: path_sorted p.
+Qed.
 
 End InsertionSort.
 
