@@ -144,9 +144,43 @@ Section InsertionSortNat.
 
 (* uphalf_addn from prelude might come in handy here *)
 (* Exercise 2.2.2 *)
+
+Lemma isort_rev_iota_eq_iota n : isort (rev (iota 0 n)) = iota 0 n.
+Proof.
+  apply: sort_unique.
+  move/permEl: (perm_rev (iota 0 n)).
+  move: (perm_isort (rev (iota 0 n))).
+  apply: perm_trans.
+  by exact: sorted_isort.
+  by exact: iota_sorted.
+Qed.
+
+Lemma T_insort_iota n m : T_insort (n + m) (iota m n) = n.+1.
+Proof.
+  elim: n m=>[| n IH m]//=.
+  rewrite {-1}addSnnS.
+  move: IH->.
+  by rewrite -{2}[m]add0n [_ + _ <= _ + m]leq_add2r ltn0.
+Qed.
+
+
 Lemma T_isort_worst n : T_isort (rev (iota 0 n)) = uphalf ((n.+1)*(n.+2)).
 Proof.
-Admitted.
+  elim: n=>[|n IH]//.
+  rewrite -{1}addn1 iotaD add0n.
+  simpl iota.
+  rewrite rev_cat.
+  simpl T_isort.
+  move: IH->.
+  rewrite isort_rev_iota_eq_iota.
+  suff: T_insort n (iota 0 n) = n.+1.
+  - move=>->.
+    rewrite -addnS.
+    rewrite -{2}[n.+2]uphalf_double uphalf_addn odd_double andbF add0n.
+    congr (uphalf _).
+    by rewrite -addnn addnA -{2 3}[n.+2]mul1n -!mulnDl !addn1 mulnC.
+  by rewrite -{1}[n]addn0 T_insort_iota.
+Qed.
 
 End InsertionSortNat.
 
