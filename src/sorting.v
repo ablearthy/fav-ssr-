@@ -113,7 +113,10 @@ Qed.
 Lemma isort_beh (f : seq T -> seq T) xs :
   perm_eq (f xs) xs -> sorted <=%O (f xs) -> f xs = isort xs.
 Proof.
-Admitted.
+  move: (perm_isort xs) ; rewrite perm_sym=> /[swap] /perm_trans /[apply] H1 H2.
+  move: H1 H2 (sorted_isort xs).
+  by apply: sort_unique.
+Qed.
 
 (* Exercise 2.2.1 *)
 
