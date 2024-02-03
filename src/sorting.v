@@ -87,6 +87,29 @@ Qed.
 
 (* Exercise 2.1 *)
 
+Lemma sort_unique (xs ys : seq T) : perm_eq xs ys -> sorted <=%O xs -> sorted <=%O ys -> xs = ys.
+Proof.
+  elim: xs ys.
+  by move=> ys ; rewrite perm_sym ; move/perm_nilP.
+  move=> x xs' IH.
+  case=>//= ; first by move/perm_nilP.
+  move=> y ys' H1 H2 H3.
+  suff: x = y.
+  - move=> H4 ; move: H4 H1 H2 H3->.
+    rewrite perm_cons=> H1 /path_sorted H2 /path_sorted H3.
+    congr (_ :: _).
+    by apply: IH.
+  apply: le_anti ; apply/andP ; split.
+  - move: (perm_mem H1 y) (mem_head y ys')<-.
+    rewrite in_cons ; move/orP ; case ; first by move/eqP=>->.
+    move: H2 ; rewrite le_path_sortedE ; move/andP ; case.
+    by move/allP=> /(_ y) /[swap] _ /[apply].
+  - move: (perm_mem H1 x) (mem_head x xs')->.
+    rewrite in_cons ; move/orP ; case ; first by move/eqP=>->.
+    move: H3 ; rewrite le_path_sortedE ; move/andP ; case.
+    by move/allP=> /(_ x) /[swap] _ /[apply].
+Qed.
+
 Lemma isort_beh (f : seq T -> seq T) xs :
   perm_eq (f xs) xs -> sorted <=%O (f xs) -> f xs = isort xs.
 Proof.
