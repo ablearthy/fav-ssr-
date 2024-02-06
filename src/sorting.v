@@ -234,7 +234,11 @@ Qed.
 
 Lemma quick2_quick xs ys : quicksort2 xs ys = quicksort xs ++ ys.
 Proof.
-Admitted.
+  move: ys.
+  funelim (quicksort xs)=>//.
+  move: H H0=>IH1 IH2 ys.
+  by rewrite -!catA -IH2 -IH1 quicksort2_unfold_eq =>//=.
+Qed.
 
 (* Exercise 2.4 *)
 
