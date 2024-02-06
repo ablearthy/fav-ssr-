@@ -226,8 +226,10 @@ Qed.
 (* Exercise 2.3 *)
 
 Equations? quicksort2 xs ys : seq T by wf (size xs) lt :=
-quicksort2 xs ys => ys. (* FIXME *)
+quicksort2 [::] ys => ys;
+quicksort2 (x::xs) ys => quicksort2 (filter (< x) xs) (x::(quicksort2 (filter (>= x) xs) ys)).
 Proof.
+  all: rewrite size_filter ; apply/ssrnat.ltP/count_size.
 Qed.
 
 Lemma quick2_quick xs ys : quicksort2 xs ys = quicksort xs ++ ys.
