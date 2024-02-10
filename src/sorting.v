@@ -278,9 +278,9 @@ Qed.
 
 Equations? T_quicksort xs : nat by wf (size xs) lt :=
 T_quicksort [::]    => 1;
-T_quicksort (x::xs) => T_quicksort (filter (< x) xs) +
-                       T_quicksort (filter (>= x) xs) +
-                       2 * T_mapfilter (fun => 1%N) xs + 1.
+T_quicksort (x::xs') => T_quicksort (filter (< x) xs') +
+                       T_quicksort (filter (>= x) xs') +
+                       2 * T_mapfilter (fun => 1%N) xs' + 1.
 Proof. all: by apply/ssrnat.ltP; rewrite size_filter; apply: count_size. Qed.
 
 (* FIXME replace these with concrete numbers *)
