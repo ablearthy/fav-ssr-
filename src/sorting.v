@@ -283,13 +283,37 @@ T_quicksort (x::xs') => T_quicksort (filter (< x) xs') +
                        2 * T_mapfilter (fun => 1%N) xs' + 1.
 Proof. all: by apply/ssrnat.ltP; rewrite size_filter; apply: count_size. Qed.
 
-(* FIXME replace these with concrete numbers *)
-Parameters (a b c : nat).
+Definition a := 2.
+Definition b := 2.
+Definition c := 1.
 
 Lemma quicksort_quadratic xs :
   sorted <=%O xs -> T_quicksort xs = a * size xs ^ 2 + b * size xs + c.
 Proof.
-Admitted.
+  move=> s.
+  funelim (T_quicksort xs)=> //=.
+  move: s=>//= s.
+  rewrite (H (sorted_filter _ _ (path_sorted s))).
+  rewrite (H0 (sorted_filter _ _ (path_sorted s))).
+  move=> {H H0}.
+  rewrite T_mapfilter_size=> //=.
+  move: s=> /le_path_min /[dup] s.
+  rewrite !size_filter all_count sum1_size count_lt_ge.
+  move/eqP=>->.
+  set t := size xs' ; apply/eqP.
+  rewrite subnn /a /b /c exp0n.
+  rewrite muln0 addn0 add0n.
+  rewrite eqn_add2r -[t + t + 1]addnA mulnDr [t + 1]addn1 addnA eqn_add2r -[t.+1]addn1
+          sqrnD mulnDr muln1 exp1n mulnDr muln1.
+  rewrite [1 + _ + _]addnACl.
+  rewrite -[_ + 2 * t + 1]addnA -addnA addnn -addnA.
+  rewrite -{6}[2]muln1 -mulnDr mul2n [2 * t +1]addnC.
+  rewrite [2 * (1 + 2 * t)]mul2n.
+  by apply/eqP.
+  by [].
+  by exact: le_trans.
+  by exact: le_trans.
+Qed.
 
 (* Exercise 2.5.2 *)
 
