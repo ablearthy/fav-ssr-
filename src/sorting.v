@@ -242,7 +242,17 @@ Qed.
 
 (* Exercise 2.4 *)
 
-(* TODO rewrite in one pass? *)
+(* rewrite in one pass? *)
+Fixpoint partition3_tail acc x xs : seq T * seq T * seq T :=
+  match xs, acc with
+  | [::], _ => acc
+  | (x'::xs'), (l, eq, r) => 
+    if x' < x then partition3_tail (x'::l, eq, r) x xs'
+      else (if x' > x then partition3_tail (l, eq, x'::r) x xs' else partition3_tail (l, x'::eq, r) x xs')
+  end.
+
+Definition partition3' := partition3_tail ([::], [::], [::]).
+
 Definition partition3 x xs : seq T * seq T * seq T :=
   (filter (< x) xs, filter (pred1 x) xs, filter (> x) xs).
 
