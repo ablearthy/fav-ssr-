@@ -271,7 +271,11 @@ Admitted.
 
 Lemma quick3_quick xs : quicksort3 xs = quicksort xs.
 Proof.
-Admitted.
+  funelim (quicksort3 xs)=> //=.
+  rewrite quicksort_equation_2 quick_filter_ge.
+  move: H-> ; move: H0->.
+  by rewrite cat1s.
+Qed.
 
 (* Exercise 2.5.1 *)
 
