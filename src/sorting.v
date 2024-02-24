@@ -334,7 +334,36 @@ Qed.
 Lemma quicksort_worst xs :
   T_quicksort xs <= a * size xs ^ 2 + b * size xs + c.
 Proof.
-Admitted.
+  funelim (T_quicksort xs)=>//=.
+  rewrite T_mapfilter_size sum1_size.
+  have HP := (leq_add H H0).
+  rewrite -(leq_add2r (2 * (size xs' + size xs' + 1) + 1)) in HP.
+  apply/leq_trans.
+  - rewrite -addnA.
+    by exact: HP.
+  set sx := size [seq x0 <- xs' | (< x) x0].
+  set sy := size [seq x0 <- xs' | (x <= x0)%O].
+  rewrite /a /b /c addnA leq_add2r -[size xs' + _ + _]addnA mulnDr addnA -[(size xs').+1]addn1 leq_add2r.
+  rewrite sqrnD exp1n muln1.
+  have H1 : 2 * sx ^ 2 + 2 * sx + 1 + (2 * sy ^ 2 + 2 * sy + 1) + 2 * size xs'
+          = 2 * sx ^ 2 + 2 * sy ^ 2 + (2 * (sx + sy) + 2 * size xs') + 2.
+  - by ring.
+  move: H1->.
+  have H2 : sx + sy = size xs'.
+  - rewrite /sx /sy !size_filter count_lt_ge.
+    Search (_ - ?x + ?x).
+    rewrite subnK.
+    by [].
+    by exact: count_size.
+  rewrite H2 mulnDr mulnDr muln1.
+  have H3 : 2 * sx ^ 2 + 2 * sy ^ 2 + (2 * size xs' + 2 * size xs') + 2
+          = 2 * (sx ^2 + sy ^ 2) + 2 + 2 * (2 * size xs').
+  by ring.
+  move: H3->.
+  rewrite leq_add2r leq_add2r.
+  rewrite leq_pmul2l ; last by [].
+  by rewrite -H2 sqrnD -{1}[sx ^ 2 + sy ^ 2]addn0 leq_add2l.
+Qed.
 
 End QuickSort.
 
