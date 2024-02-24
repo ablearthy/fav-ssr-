@@ -1,13 +1,13 @@
-{ pkgs ? import <nixpkgs> {} }:
-  pkgs.mkShell {
-    nativeBuildInputs = [ 
-			pkgs.gmp
-			pkgs.coq
-			pkgs.opam
-			pkgs.ocaml
-		];
+{ pkgs ? import <nixpkgs> { } }:
+pkgs.mkShell {
+  nativeBuildInputs = [
+    pkgs.gmp
+    pkgs.coq
+    pkgs.opam
+    pkgs.ocaml
+  ];
 
-		shellHook = '' 
+  shellHook = '' 
 			opam repo add coq-released https://coq.inria.fr/opam/released
 			opam update
 			opam install coq-equations
