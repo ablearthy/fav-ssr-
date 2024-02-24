@@ -10,19 +10,21 @@
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
+        vscoq = (import ./vscoq.nix) pkgs;
         devTools = with pkgs; [
           bashInteractive
-          
+
           coqPackages.coq
           coqPackages.mathcomp
           coqPackages.equations
-
-          coqPackages.coq-lsp
-        ];
-      in {
+        ] ++ [ vscoq ];
+      in
+      {
         devShell = pkgs.mkShell ({
           buildInputs = devTools;
+          nativeBuildInputs = [ pkgs.coq ];
         });
+        formatter = pkgs.nixpkgs-fmt;
       }
     );
 }
