@@ -263,11 +263,44 @@ quicksort3 (x::xs) with inspect (partition3 x xs) => {
 }.
 Proof. all: by apply/ssrnat.ltP; rewrite size_filter; apply: count_size. Qed.
 
+
+Lemma last_filter x xs : (last x (filter (pred1 x) xs)) = x.
+Proof.
+  elim: xs =>[| x' xs IH]//=.
+  case: eqP ; last by [].
+  by move=>-> //=.
+Qed.
+
 (* this is the main part *)
 Lemma quick_filter_ge x xs :
   quicksort (filter (>= x) xs) = filter (pred1 x) xs ++ quicksort (filter (> x) xs).
 Proof.
-Admitted.
+  apply: le_sorted_eq.
+  by exact: sorted_quicksort.
+  - apply: (@path_sorted T <=%O x).
+    rewrite cat_path ; apply/andP ; split.
+    - elim: xs=> [| x' xs IH] //=.
+      case: eqP ; last by [].
+      move=>-> //= ; apply/andP ; by split.
+    - rewrite last_filter.
+      rewrite path_min_sorted ; first by exact: sorted_quicksort.
+      rewrite (perm_all (>= x) (perm_quicksort (filter (> x) xs))).
+      apply/sub_all ; by [exact: ltW | exact: filter_all].
+    apply/perm_trans ; first by exact: perm_quicksort.
+    move: (perm_quicksort (filter (> x) xs))=> H.
+    rewrite -(@perm_cat2l _ (filter (pred1 x) xs)) in H.
+    rewrite perm_sym.
+    apply/perm_trans ; first by exact: H.
+    apply/permP.
+    move=> a {H}.
+    elim: xs=>[| x' xs IH]//=.
+    move: (comparable_ltgtP (comparableT x' x)).
+    case=> //=.
+    - rewrite -IH !count_cat=> //=.
+      by rewrite addnCA.
+    move=> _.
+    by congr (_ + _).
+Qed.
 
 Lemma quick3_quick xs : quicksort3 xs = quicksort xs.
 Proof.
