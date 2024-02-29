@@ -485,8 +485,61 @@ Qed.
 
 (* Exercise 2.6 *)
 
-Fixpoint halve {A: Type} (xs ys zs : seq A) : seq A * seq A :=
-  ([::],[::]). (* FIXME *)
+Fixpoint halve_b {A : Type} (b : bool) (xs ys zs : seq A) : seq A * seq A :=
+  match xs, b with
+  | [::], _ => (ys, zs)
+  | (x::xs'), true => halve_b false xs' ys (x::zs)
+  | (x::xs'), false => halve_b true xs' (x::ys) zs
+  end.
+    
+(* Fixpoint halve {A: Type} (xs ys zs : seq A) : seq A * seq A :=
+  match xs with
+  | [::] => (ys, zs)
+  | [::x] => (x::ys, zs)
+  | (x::y::xs') => halve xs' (x::ys) (y::zs)
+  end. *)
+  
+Equations halve {A : Type} (xs ys zs : seq A) : seq A * seq A :=
+halve [::] ys zs => (ys, zs);
+halve [::x] ys zs => (x::ys, zs);
+halve (x::y::xs') ys zs => halve xs' (x::ys) (y::zs).
+
+Lemma halve_size_left {A : Type} x y (xs acc0 acc1 r0 r1 : seq A) : halve (x::y::xs) acc0 acc1 = (r0, r1)
+  -> size r0 < size xs + size acc0 + 2.
+Proof.
+  rewrite halve_equation_3.
+  funelim (halve xs (x::acc0) (y::acc1)).
+  rewrite halve_equation_1=> /pair_equal_spec ; case=><- _ //=.
+  rewrite add0n addn2 ; by exact: ltnSn.
+  rewrite halve_equation_2=> /pair_equal_spec ; case=><- _ //=.
+  rewrite -addn2 [size acc0 + _ < _ + _]ltn_add2r add1n ; by exact: ltnSn.
+  rewrite halve_equation_3=> /H //=.
+  move=> H1.
+  apply/ltn_trans.
+  by exact: H1.
+  have D : size xs' + (size acc0).+1 + 2 = ((size xs').+2 + size acc0).+1 by ring.
+  move: D=>-> ; rewrite addn2.
+  by exact: ltnSn.
+Qed.
+
+Lemma halve_size_right {A : Type} x y (xs acc0 acc1 r0 r1 : seq A) : halve (x::y::xs) acc0 acc1 = (r0, r1)
+  -> size r1 < size xs + size acc1 + 2.
+Proof.
+  rewrite halve_equation_3.
+  funelim (halve xs (x::acc0) (y::acc1)).
+  rewrite halve_equation_1=> /pair_equal_spec ; case=>_ <- //=.
+  rewrite add0n addn2 ; by exact: ltnSn.
+  rewrite halve_equation_2=> /pair_equal_spec ; case=>_ <- //=.
+  by rewrite addnCAC -addn1 -{1}[size acc1]add0n -addnA -addnA [0 + _ < _ + _]ltn_add2r.
+  rewrite halve_equation_3=> /H //=.
+  move=> H1.
+  apply/ltn_trans.
+  by exact: H1.
+  have D : size xs' + (size acc1).+1 + 2 = ((size xs').+2 + size acc1).+1 by ring.
+  move: D=>-> ; rewrite addn2.
+  by exact: ltnSn.
+Qed.
+
 
 Equations? msort2 xs : seq T by wf (size xs) lt :=
 msort2 [::]  => [::];
@@ -495,10 +548,11 @@ msort2 xs with inspect (halve xs [::] [::]) := {
   | (ys1, ys2) eqn: eq => merge <=%O (msort2 ys1) (msort2 ys2)
 }.
 Proof.
-all: apply/ssrnat.ltP.
-(* FIXME *)
-- by [].
-by [].
+  all: apply/ssrnat.ltP.
+  move: (halve_size_left eq)=> //=.
+  by rewrite addn0 addn2.
+  move: (halve_size_right eq)=> //=.
+  by rewrite addn0 addn2.
 Qed.
 
 Lemma perm_msort2 xs : perm_eq (msort2 xs) xs.
