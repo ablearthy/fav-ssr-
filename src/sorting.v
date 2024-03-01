@@ -553,9 +553,28 @@ Proof.
   by rewrite addn0 addn2.
 Qed.
 
+Lemma perm_halve xs acc0 acc1 r0 r1 : halve xs acc0 acc1 = (r0, r1)
+  -> perm_eq (xs ++ acc0 ++ acc1) (r0 ++ r1).
+Proof.
+  elim/halve_ind: xs acc0 acc1 r0 r1=> //=.
+  by move=> acc0 acc1 r0 r1 ; case=><-<-.
+  by move=> x acc0 acc1 r0 r1 ; case=><-<- ; rewrite cat_cons.
+  move=> x y xs IH acc0 acc1 r0 r1 /IH H1.
+  apply/perm_trans ; last by exact: H1.
+  by rewrite perm_sym perm_catCA cat_cons perm_cons perm_catC -catA perm_catCA cat_cons perm_cons perm_catC -catA.
+Qed.
+
 Lemma perm_msort2 xs : perm_eq (msort2 xs) xs.
 Proof.
-Admitted.
+  funelim (msort2 xs)=> //=.
+  move=> {H1}.
+  rewrite perm_merge.
+  apply/perm_trans. by exact: (perm_cat H H0).
+  rewrite perm_sym.
+  rewrite -[[:: _, _ & _]]cats0 -[[:: _, _ & _] ++ _]cats0 -catA.
+  move: eq.
+  by exact: perm_halve.
+Qed.
 
 Lemma sorted_msort2 xs : sorted <=%O (msort2 xs).
 Proof.
