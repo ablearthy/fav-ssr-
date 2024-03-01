@@ -491,52 +491,50 @@ Fixpoint halve_b {A : Type} (b : bool) (xs ys zs : seq A) : seq A * seq A :=
   | (x::xs'), true => halve_b false xs' ys (x::zs)
   | (x::xs'), false => halve_b true xs' (x::ys) zs
   end.
-    
-(* Fixpoint halve {A: Type} (xs ys zs : seq A) : seq A * seq A :=
+
+Fixpoint halve {A: Type} (xs ys zs : seq A) : seq A * seq A :=
   match xs with
   | [::] => (ys, zs)
   | [::x] => (x::ys, zs)
   | (x::y::xs') => halve xs' (x::ys) (y::zs)
-  end. *)
+  end.
   
-Equations halve {A : Type} (xs ys zs : seq A) : seq A * seq A :=
-halve [::] ys zs => (ys, zs);
-halve [::x] ys zs => (x::ys, zs);
-halve (x::y::xs') ys zs => halve xs' (x::ys) (y::zs).
+Fixpoint halve_ind (A : Type) (P : seq A -> Prop)
+  (P0 : P [::]) (P1 : forall x, P [::x])
+  (P2 : forall x y (xs : seq A), P xs -> P (x::y::xs))
+  (xs : seq A) : P xs :=
+  match xs with
+  | [::] => P0
+  | [::x] => P1 x
+  | (x::y::xs') => P2 x y xs' (halve_ind P0 P1 P2 xs')
+  end.
 
 Lemma halve_size_left {A : Type} x y (xs acc0 acc1 r0 r1 : seq A) : halve (x::y::xs) acc0 acc1 = (r0, r1)
   -> size r0 < size xs + size acc0 + 2.
 Proof.
-  rewrite halve_equation_3.
-  funelim (halve xs (x::acc0) (y::acc1)).
-  rewrite halve_equation_1=> /pair_equal_spec ; case=><- _ //=.
-  rewrite add0n addn2 ; by exact: ltnSn.
-  rewrite halve_equation_2=> /pair_equal_spec ; case=><- _ //=.
-  rewrite -addn2 [size acc0 + _ < _ + _]ltn_add2r add1n ; by exact: ltnSn.
-  rewrite halve_equation_3=> /H //=.
-  move=> H1.
+  move=> //=.
+  elim/halve_ind: xs acc0 acc1 x y.
+  - move=> a b c d; case=><- _ //= ; rewrite add0n addn2 ; by exact: ltnSn.
+  - move=> x0 a b c d; case=><- _ //= ; rewrite -addn2 [size _ + _ < _ + _]ltn_add2r add1n ; by exact: ltnSn.
+  move=> x y xs IH acc0 acc1 x0 y0 /IH //= H1.
   apply/ltn_trans.
   by exact: H1.
-  have D : size xs' + (size acc0).+1 + 2 = ((size xs').+2 + size acc0).+1 by ring.
-  move: D=>-> ; rewrite addn2.
+  rewrite -[size xs + _]addSnnS -!addnA ltn_add2r.
   by exact: ltnSn.
 Qed.
 
 Lemma halve_size_right {A : Type} x y (xs acc0 acc1 r0 r1 : seq A) : halve (x::y::xs) acc0 acc1 = (r0, r1)
   -> size r1 < size xs + size acc1 + 2.
 Proof.
-  rewrite halve_equation_3.
-  funelim (halve xs (x::acc0) (y::acc1)).
-  rewrite halve_equation_1=> /pair_equal_spec ; case=>_ <- //=.
-  rewrite add0n addn2 ; by exact: ltnSn.
-  rewrite halve_equation_2=> /pair_equal_spec ; case=>_ <- //=.
-  by rewrite addnCAC -addn1 -{1}[size acc1]add0n -addnA -addnA [0 + _ < _ + _]ltn_add2r.
-  rewrite halve_equation_3=> /H //=.
-  move=> H1.
+  move=> //=.
+  elim/halve_ind: xs acc0 acc1 x y.
+  - move=> a b c d; case=>_ <- //= ; rewrite add0n addn2 ; by exact: ltnSn.
+  - move=> x0 a b c d; case=>_ <- //=.
+  by rewrite -addn1 addnCAC -{1}[size _]add0n -!addnA [_ + _ < _ + _]ltn_add2r.
+  move=> x y xs IH acc0 acc1 x0 y0 /IH //= H1.
   apply/ltn_trans.
   by exact: H1.
-  have D : size xs' + (size acc1).+1 + 2 = ((size xs').+2 + size acc1).+1 by ring.
-  move: D=>-> ; rewrite addn2.
+  rewrite -[size xs + _]addSnnS -!addnA ltn_add2r.
   by exact: ltnSn.
 Qed.
 
