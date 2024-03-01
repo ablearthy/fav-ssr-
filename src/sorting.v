@@ -578,7 +578,9 @@ Qed.
 
 Lemma sorted_msort2 xs : sorted <=%O (msort2 xs).
 Proof.
-Admitted.
+  funelim (msort2 xs)=> //=.
+  by exact: merge_sorted.
+Qed.
 
 End TopDownMergeSort.
 
